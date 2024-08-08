@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="counting">
+	<select id="item" resultType="Counting">
+		select * from counting
+		where countcode = #{countcode}
+	</select>
+	
+	<update id="update">
+		UPDATE counting
+		set totalcount=#{totalcount}+1, dailycount=#{dailycount}+1, weekcount=#{weekcount}+1, monthcount=#{monthcount}+1
+		where countcode = #{countcode}
+	</update>
+	
+	<update id="resetDailyCount">
+		UPDATE counting
+		set dailycount= 0
+		where countcode = #{countcode}
+	</update>
+	
+	<update id="resetWeekCount">
+		UPDATE counting
+		set weekcount= 0
+		where countcode = #{countcode}
+	</update>
+	
+	<update id="resetMonthCount">
+		UPDATE counting
+		set monthcount= 0
+		where countcode = #{countcode}
+	</update>
+</mapper>

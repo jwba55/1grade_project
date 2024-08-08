@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="playlist">
+	<select id="total" resultType="Integer">
+  SELECT COUNT(*) FROM playlists
+	</select>
+	
+	<select id="list" resultType="Playlist" resultMap="PlaylistMap">
+        SELECT * 
+	    FROM
+        (
+	        SELECT sub.*, ROWNUM rnum FROM (
+	            SELECT  playlists.* FROM playlists 
+                JOIN users ON playlists.userID=users.userID 
+	            ORDER BY playlists.pllistnum
+	        )sub )
+	    
+		<if test="perPage != 0">
+			<![CDATA[
+				WHERE rnum > ((#{page}-1) * #{perPage}) and rnum <= (#{page} * #{perPage})
+			]]>
+		</if>
+	</select>
+	
+		<select id="playlist" resultType="Playlist" resultMap="PlaylistMap">
+        SELECT * 
+	    FROM
+        (
+	        SELECT sub.*, ROWNUM rnum FROM (
+	            SELECT playlists.pllistnum, music_info.*, pldetail.plcode FROM pldetail
+                left JOIN music_info ON music_info.plnum=pldetail.plnum
+                left JOIN playlists ON pldetail.pllistnum=playlists.pllistnum
+	        )sub )
+	    
+		<if test="perPage != 0">
+			<![CDATA[
+				WHERE rnum > ((#{page}-1) * #{perPage}) and rnum <= (#{page} * #{perPage})
+			]]>
+		</if>
+	</select>
+	
+	<insert id="add">
+  INSERT INTO playlists
+  VALUES (PLAYLISTS_SEQ.nextval ,#{pllistname}, #{userID})
+  <selectKey keyProperty="pllistnum" resultType="Long" order="AFTER">
+  SELECT PLAYLISTS_SEQ.currval FROM dual
+  </selectKey>
+  
+	</insert>
+	
+	<insert id="add_pldetail">
+  INSERT INTO pldetail
+  VALUES (PLDETAIL_SEQ.nextval, #{plnum}, #{pllistnum}, #{amount})
+	</insert>
+	
+	<resultMap type="Playlist" id="PlaylistMap">
+ 		<id column="pllistnum" property="pllistnum" />
+ 		<result column="pllistname" property="pllistname"/>
+ 		<result column="userID" property="userID"/>
+ 		
+ 	<association javaType="Music_info" property="music_info">
+		<id column="plnum" property="plnum"/>
+		<result column="plname" property="plname"/>
+		<result column="artist" property="artist"/>
+		<result column="genre" property="genre"/>
+		<result column="price" property="price"/>
+		<result column="userID" property="userID"/>
+	</association>
+ 		
+  	<collection column="pln" property="pldetail" javaType="ArrayList" ofType="Pldetail" autoMapping="true">
+  		<id column="plcode" property="plcode" />
+  	</collection>	
+	</resultMap>
+	
+	<select id="item" resultType="Playlist" resultMap="PlaylistMap">
+	  SELECT playlists.*, pldetail.*, music_info.plname, pldetail.pllistnum pln FROM playlists
+	  JOIN pldetail ON playlists.pllistnum=pldetail.pllistnum
+	  JOIN music_info ON pldetail.plnum=music_info.plnum
+	  WHERE playlists.pllistnum=#{pllistnum}
+	</select>
+</mapper>

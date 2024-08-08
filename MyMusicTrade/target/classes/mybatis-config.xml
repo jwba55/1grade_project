@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+		<setting name="jdbcTypeForNull" value="NULL" />
+	</settings>
+	
+	<typeAliases>
+		<typeAlias type="com.mmt.MyMusicTrade.model.Users" alias="Users"/>
+		<typeAlias type="com.mmt.MyMusicTrade.model.Music_info" alias="Music_info"/>
+		<typeAlias type="com.mmt.MyMusicTrade.model.Trade" alias="Trade"/>
+		<typeAlias type="com.mmt.MyMusicTrade.model.Pldetail" alias="Pldetail"/>
+		<typeAlias type="com.mmt.MyMusicTrade.model.Playlist" alias="Playlist"/>
+		<typeAlias type="com.mmt.MyMusicTrade.model.Event" alias="Event"/>
+		<typeAlias type="com.mmt.MyMusicTrade.model.Counting" alias="Counting"/>
+		<typeAlias type="com.mmt.MyMusicTrade.model.Fileupload" alias="Fileupload"/>
+		<typeAlias type="com.mmt.MyMusicTrade.model.Ranking" alias="Ranking"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="mybatis/users.xml"/>	
+		<mapper resource="mybatis/music_info.xml"/>
+		<mapper resource="mybatis/trade.xml"/>
+		<mapper resource="mybatis/playlist.xml"/>
+		<mapper resource="mybatis/event.xml"/>
+		<mapper resource="mybatis/counting.xml"/>
+		<mapper resource="mybatis/ranking.xml"/>
+	</mappers>
+</configuration>

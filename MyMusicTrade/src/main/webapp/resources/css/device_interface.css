@@ -1,0 +1,10 @@
+@charset "UTF-8";
+<style>
+	@media (max-width: 900px) {
+ 		#text {
+ 		font-size: 9px;
+ 		padding-right: 30px;
+ 		padding-left: 30px;
+ 		}
+	}
+</style>

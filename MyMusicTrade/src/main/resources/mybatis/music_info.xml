@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="music_info">
+
+	<resultMap type="Music_info" id="music_infoMap">
+			<id column="plnum" property="plnum"/>
+			<result column="plname" property="plname"/>
+			<result column="artist" property="artist"/>
+			<result column="genre" property="genre"/>
+			<result column="price" property="price"/>
+			<result column="userID" property="userID"/>
+		
+		<association javaType="Counting" property="counting">
+			<id column="countcode" property="countcode"/>
+			<result column="totalcount" property="totalcount"/>
+			<result column="dailycount" property="dailycount"/>
+			<result column="weekcount" property="weekcount"/>
+			<result column="monthcount" property="monthcount"/>
+		</association>
+		
+		<collection javaType="ArrayList" property="fileupload" ofType="Fileupload" column="plnum" autoMapping="true">
+			<id column="filenum" property="filenum"/>
+			<result column="uuid" property="uuid"/>
+			<result column="filename" property="filename"/>
+			<result column="plnum" property="plnum"/>
+		</collection>
+
+	</resultMap>
+	
+		<resultMap type="Music_info" id="fileuploadMap" autoMapping="true">
+			<id column="plnum" property="plnum"/>
+			<result column="plname" property="plname"/>
+			<result column="artist" property="artist"/>
+			<result column="genre" property="genre"/>
+			<result column="price" property="price"/>
+			<result column="userID" property="userID"/>
+			
+			<association javaType="Users" property="users">
+				<id column="userID" property="userID"/>
+			</association>
+			
+		<collection javaType="ArrayList" property="fileupload" ofType="Fileupload" column="plnum" autoMapping="true">
+			<id column="filenum" property="filenum"/>
+			<result column="uuid" property="uuid"/>
+			<result column="filename" property="filename"/>
+			<result column="plnum" property="plnum"/>
+		</collection>
+			
+		</resultMap>	
+	
+	<select id = "total" resultType="Integer">
+		select count(*) from music_info
+	</select>
+	
+	<select id="list" resultType="Music_info" resultMap="music_infoMap">
+	   SELECT * 
+	    FROM
+        (
+	        SELECT sub.*, ROWNUM rnum FROM (
+	            SELECT * FROM music_info 
+	            left JOIN counting ON music_info.plnum=counting.countcode
+                left join fileupload on music_info.plnum=fileupload.plnum
+	        ) sub)
+	    
+		<if test="perPage != 0">
+			<![CDATA[
+				WHERE rnum > ((#{page}-1) * #{perPage}) and rnum <= (#{page} * #{perPage})
+			]]>
+		</if>
+	</select>
+	
+	<!-- <select id="fileupload" resultType="Fileupload" resultMap="fileuploadMap">
+		select * from music_info
+		Join fileupload on fileupload.plnum = music_info.plnum
+		where plnum=#{plnum}	
+	</select> -->
+	
+	<select id="item" resultType="Music_info" resultMap="fileuploadMap">
+		select music_info.*, fileupload.* from music_info
+		Join fileupload on fileupload.plnum = music_info.plnum
+		JOIN users ON users.userID=music_info.userID
+		where plnum=#{plnum}
+	</select>
+	
+	<insert id="add">
+		insert
+		into music_info
+		values (MUSIC_INFO_SEQ.nextval, #{artist}, #{plname}, #{genre}, #{price}, #{userID})
+		
+		<selectKey keyProperty="plnum" resultType="Long" order="AFTER">
+			select MUSIC_INFO_SEQ.currval FROM dual
+		</selectKey>
+	</insert> 
+	
+	<update id="update">
+		update music_info
+		set plnum=#{plnum}, artist=#{artist}, plname=#{plname}, genre=#{genre}, price=#{price}, userID=#{userID}
+	</update>
+	
+	<delete id="delete">
+		delete from music_info
+		where plnum=#{plnum}
+	</delete>
+	
+	    
+    <!-- 파일 업로드를 위한 insert 쿼리 -->
+    <insert id="add_fileupload">
+        INSERT INTO fileupload (filenum, plnum, filename, uuid, fileExtension)
+        VALUES (FILEUPLOAD_SEQ.nextval, #{plnum}, #{filename}, #{uuid},
+            <include refid="fileUploadPath" />
+        )
+    </insert>
+    
+    	    <!-- 파일 업로드 경로 설정 SQL -->
+    <sql id="fileUploadPath">
+        <choose>
+            <!-- 파일 확장자가 mp3 또는 ogg인 경우 -->
+            <when test="fileExtension == 'mp3' or fileExtension == 'ogg'">
+                '/mp3/' || #{filename}
+            </when>
+            <!-- 파일 확장자가 jpg, jpeg, png, svg인 경우 -->
+            <when test="fileExtension == 'jpg' or fileExtension == 'jpeg' or fileExtension == 'png' or fileExtension == 'svg'">
+                '/images/' || #{filename}
+            </when>
+                       <!-- 파일 확장자가 mp4, webm, avi, wmv인 경우 -->
+            <when test="fileExtension == 'mp4' or fileExtension == 'webm' or fileExtension == 'avi' or fileExtension == 'wmv'">
+                '/video/' || #{filename}
+            </when>
+            <!-- 다른 모든 확장자인 경우 -->
+            <otherwise>
+                '/other/' || #{filename}
+            </otherwise>
+        </choose>
+    </sql>
+        
+    <select id="list_plcart" resultType="Music_info">
+    	SELECT * FROM music_info
+    	
+	  	<where>
+			  <if test="plcart.size() lt 1">
+			  0=1
+			  </if>
+			  <foreach collection="plcart" open="plnum IN (" close=")" separator="," index="plnum" item="amount">
+			 		#{plnum}
+			  </foreach>
+	  	</where>
+    </select>
+ 
+</mapper>

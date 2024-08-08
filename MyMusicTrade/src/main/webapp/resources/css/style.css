@@ -1,0 +1,43 @@
+@charset "UTF-8";
+.main-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  display: inline-block;
+  position: relative;
+}
+
+.menu-item a {
+  display: block;
+  padding: 10px;
+  text-decoration: none;
+}
+
+.sub-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+}
+
+.menu-item:hover .sub-menu {
+  display: block;
+}
+
+.sub-menu li {
+  display: block;
+}
+
+.sub-menu li a {
+  padding: 10px;
+  background-color: #f1f1f1;
+  color: #333;
+  text-decoration: none;
+}
+
+.sub-menu li a:hover {
+  background-color: #ccc;
+}

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ranking">
+	<select id="total" resultType="Integer">
+		SELECT COUNT(*) FROM ranking
+	</select>
+	
+	<select id="item" resultType="Ranking" resultMap="rankMap">
+		select music_info.*, counting.*, ranking.* from music_info
+		JOIN counting ON music_info.plnum=counting.countcode
+		JOIN ranking ON music_info.plnum=ranking.rankid
+		where rankid=#{rankid}
+	</select>
+	
+		<select id="list" resultType="Ranking">
+			SELECT * FROM ranking
+		</select>
+	
+		<!-- 데일리 랭킹리스트 --> 
+	<select id="dailylist" resultType="Ranking" resultMap="rankMap">
+		SELECT * 
+	    FROM
+        (
+	        SELECT sub.*, ROWNUM rnum FROM (
+	            SELECT  ranking.dailyrank, music_info.*, counting.dailycount FROM ranking
+	            JOIN music_info ON ranking.rankid=music_info.plnum
+                JOIN counting ON counting.countcode= music_info.plnum
+	            ORDER BY counting.dailycount desc
+	        ) sub)
+	    
+		<if test="perPage != 0">
+			<![CDATA[
+				WHERE rnum > ((#{page}-1) * #{perPage}) and rnum <= (#{page} * #{perPage})
+			]]>
+		</if>
+	</select>
+	
+	<select id="weeklist" resultType="Ranking" resultMap="rankMap">
+		SELECT * 
+	    FROM
+        (
+	        SELECT sub.*, ROWNUM rnum FROM (
+	            SELECT  ranking.weekrank, music_info.*, counting.weekcount FROM ranking
+	            JOIN music_info ON ranking.rankid=music_info.plnum
+                JOIN counting ON counting.countcode= music_info.plnum
+	            ORDER BY counting.weekcount desc
+	        ) sub)
+	    
+		<if test="perPage != 0">
+			<![CDATA[
+				WHERE rnum > ((#{page}-1) * #{perPage}) and rnum <= (#{page} * #{perPage})
+			]]>
+		</if>
+	</select>
+	
+			<!-- 월별 랭킹리스트 --> 
+	<select id="monthlist" resultType="Ranking" resultMap="rankMap">
+		SELECT * 
+	    FROM
+        (
+	        SELECT sub.*, ROWNUM rnum FROM (
+	            SELECT  ranking.monthrank, music_info.*, counting.monthcount FROM ranking
+	            JOIN music_info ON ranking.rankid=music_info.plnum
+                JOIN counting ON counting.countcode= music_info.plnum
+	            ORDER BY counting.monthcount desc
+	        ) sub)
+	    
+		<if test="perPage != 0">
+			<![CDATA[
+				WHERE rnum > ((#{page}-1) * #{perPage}) and rnum <= (#{page} * #{perPage})
+			]]>
+		</if>
+	</select>
+	
+				<!-- 전체 랭킹리스트 --> 
+	<select id="totallist" resultType="Ranking" resultMap="rankMap">
+		SELECT * 
+	    FROM
+        (
+	        SELECT sub.*, ROWNUM rnum FROM (
+	            SELECT  ranking.totalrank, music_info.*, counting.totalcount FROM ranking
+	            JOIN music_info ON ranking.rankid=music_info.plnum
+                JOIN counting ON counting.countcode= music_info.plnum
+	            ORDER BY counting.totalcount desc
+	        ) sub)
+	    
+		<if test="perPage != 0">
+			<![CDATA[
+				WHERE rnum > ((#{page}-1) * #{perPage}) and rnum <= (#{page} * #{perPage})
+			]]>
+		</if>
+	</select>
+	
+	<update id="totalrank">
+		UPDATE ranking
+		SET ranking.totalrank = (
+		    SELECT sub.rnum
+		    FROM (
+		        SELECT ranking.*, ROWNUM rnum FROM (
+		            SELECT ranking.rankid, ranking.totalrank, music_info.plnum, counting.totalcount
+		            FROM ranking
+		            JOIN music_info ON ranking.rankid = music_info.plnum
+		            JOIN counting ON counting.countcode = music_info.plnum
+		            ORDER BY counting.totalcount DESC
+		        )ranking
+		    ) sub
+		    WHERE sub.rankid = ranking.rankid
+		)
+	</update>
+	
+	<update id="monthrank">
+		UPDATE ranking
+		SET ranking.monthrank = (
+		    SELECT sub.rnum
+		    FROM (
+		        SELECT ranking.*, ROWNUM rnum FROM (
+		            SELECT ranking.rankid, ranking.monthrank, music_info.plnum, counting.monthcount
+		            FROM ranking
+		            JOIN music_info ON ranking.rankid = music_info.plnum
+		            JOIN counting ON counting.countcode = music_info.plnum
+		            ORDER BY counting.monthcount DESC
+		        )ranking
+		    ) sub
+		    WHERE sub.rankid = ranking.rankid
+		)
+	</update>
+	
+		<update id="weekrank">
+		UPDATE ranking
+		SET ranking.weekrank = (
+		    SELECT sub.rnum
+		    FROM (
+		        SELECT ranking.*, ROWNUM rnum FROM (
+		            SELECT ranking.rankid, ranking.weekrank, music_info.plnum, counting.weekcount
+		            FROM ranking
+		            JOIN music_info ON ranking.rankid = music_info.plnum
+		            JOIN counting ON counting.countcode = music_info.plnum
+		            ORDER BY counting.weekcount DESC
+		        )ranking
+		    ) sub
+		    WHERE sub.rankid = ranking.rankid
+		)
+	</update>
+	
+		<update id="dailyrank">
+		UPDATE ranking
+		SET ranking.dailyrank = (
+		    SELECT sub.rnum
+		    FROM (
+		        SELECT ranking.*, ROWNUM rnum FROM (
+		            SELECT ranking.rankid, ranking.dailyrank, music_info.plnum, counting.dailycount
+		            FROM ranking
+		            JOIN music_info ON ranking.rankid = music_info.plnum
+		            JOIN counting ON counting.countcode = music_info.plnum
+		            ORDER BY counting.dailycount DESC
+		        )ranking
+		    ) sub
+		    WHERE sub.rankid = ranking.rankid
+		)
+	</update>
+	
+		<resultMap type="Ranking" id="rankMap">
+			<id column="rankid" property="rankid"/>
+			<result column="dailyrank" property="dailyrank"/>
+			<result column="weekrank" property="weekrank"/>
+			<result column="monthrank" property="monthrank"/>
+			<result column="totalrank" property="totalrank"/>
+	
+		<association javaType="Music_info" property="music_info">
+			<id column="plnum" property="plnum"/>
+			<result column="plname" property="plname"/>
+			<result column="artist" property="artist"/>
+			<result column="genre" property="genre"/>
+			<result column="price" property="price"/>
+			<result column="userID" property="userID"/>
+		</association>
+		
+		<association javaType="Counting" property="counting">
+			<id column="countcode" property="countcode"/>
+			<result column="totalcount" property="totalcount"/>
+			<result column="dailycount" property="dailycount"/>
+			<result column="weekcount" property="weekcount"/>
+			<result column="monthcount" property="monthcount"/>
+		</association>
+
+		</resultMap>
+		
+</mapper>

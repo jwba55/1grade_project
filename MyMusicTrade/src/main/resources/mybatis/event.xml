@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="event">
+	<select id = "total" resultType="Integer">
+		select count(*) from event
+	</select>
+	
+	<select id="list" resultType="Event">
+	    SELECT * FROM (
+	        SELECT sub.*, ROWNUM rnum FROM (
+	            SELECT * FROM event ORDER BY eventid
+	        ) sub
+	    )
+		<if test="perPage != 0">
+			<![CDATA[
+				WHERE rnum > ((#{page}-1) * #{perPage}) and rnum <= (#{page} * #{perPage})
+			]]>
+		</if>
+	</select>
+	
+	<select id="item" resultType="Event">
+		select * from event
+		where plnum=#{plnum}
+	</select>
+	
+	<insert id="add">
+		insert into event
+		values (EVENT_SEQ.nextval)
+		
+		<selectKey keyProperty="plnum" resultType="Long" order="AFTER">
+			select EVENT_SEQ.currval FROM dual
+		</selectKey>
+	</insert>
+	
+</mapper>
