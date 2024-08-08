@@ -1,6 +1,6 @@
 package com.mmt.MyMusicTrade.controller;
 
-import java.util.List;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.mmt.MyMusicTrade.model.Users;
-import com.mmt.MyMusicTrade.pager.Pager;
+
 import com.mmt.MyMusicTrade.service.UsersService;
 
 @Controller
@@ -21,29 +21,6 @@ public class UsersController {
 	
 	@Autowired
 	UsersService service;
-	
-	@GetMapping("/list")
-	String list(Pager pager, Model model) {
-		List<Users> list = service.list(pager);
-		
-		model.addAttribute("list", list);
-		
-		return path + "list";
-	}
-
-	@GetMapping("/add")
-	String add() {
-		return path + "add";
-	}
-	
-	@PostMapping("/add")
-	String add(Users item){
-		
-		service.add(item);
-		
-		
-		return "redirect:list";
-	}
 	
 	@GetMapping("/update/{userID:.+}")	
 	String update(@PathVariable String userID, Model model){

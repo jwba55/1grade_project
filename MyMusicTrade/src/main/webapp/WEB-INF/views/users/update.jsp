@@ -60,7 +60,7 @@
 					<input type="text" name="userEmail" value="${item.userEmail}">@
 					<input type="text" name="emailaddr" value="${item.emailaddr}" >
 				</div>
-				
+
 				<label for="chkMailSMS" style="float: left;"> 메일/SMS 정보 수신 여부: </label> &nbsp;
   					<input type="radio" name="chkMailSMS" value="yes" checked class="form-control"> 수신
   					<input type="radio" name="chkMailSMS" value="no" class="form-control"> 거부 <br>
